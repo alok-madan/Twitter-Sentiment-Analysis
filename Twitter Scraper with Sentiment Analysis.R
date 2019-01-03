@@ -29,11 +29,11 @@ library(ggplot2)
         
         
         ##### SEARCH QUERY #############
-        tweets_s <- searchTwitter("QUERY", n=500,lang = "en")
+        tweets <- searchTwitter("QUERY", n=500,lang = "en")
         
         
         #convert to dataframe
-        Query_tweets <- twListToDF(tweets_s)
+        Query_tweets <- twListToDF(tweets)
         
         
         
@@ -76,7 +76,7 @@ library(ggplot2)
        
        ggplot(data=Sentimentscores_Query,aes(x=sentiment,y=Score))+geom_bar(aes(fill=sentiment),stat = "identity")+
           theme(legend.position="none")+
-          xlab("Sentiments")+ylab("scores")+ggtitle("Sentiments of people behind the tweets on Frank Ocean")
+          xlab("Sentiments")+ylab("scores")+ggtitle("Sentiments of people behind the tweets on Query")
       
   
         
