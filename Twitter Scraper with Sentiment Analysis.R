@@ -1,89 +1,84 @@
-### install ###
-
+###Packages###
 install.packages("twitteR")
 install.packages("ROAuth")
-install.packages(utils)
 
-### load ###
-library("NLP")
+###Lbrarys###
+
 library("twitteR")
-library("syuzhet")
-library("tm")
-library("SnowballC")
-library("stringi")
-library("topicmodels")
 library("syuzhet")
 library("twitteR")
 library("ROAuth")
-library(RColorBrewer)
+library("RColorBrewer")
 library("wordcloud")
-library(ggplot2)
-        
-        #twitter authentication
-        consumer_key <- 'INSERT CONSUMER KEY'
-        consumer_secret <- 'INSERT CONSUMER SECRET'
-        access_token <- 'INSERT ACCESS TOKEN'
-        access_secret <- 'INSERT ACCESS SECRET'
-        
-        setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
-        
-        
-        ##### SEARCH QUERY #############
-        tweets <- searchTwitter("QUERY", n=500,lang = "en")
-        
-        
-        #convert to dataframe
-        Query_tweets <- twListToDF(tweets)
-        
-        
-        
-        # convert to text Only
-        Query_text<- Query_tweets$text
-        
-        
-        
-        ######## Clean text ###############
-        #convert to lower case
-        Query_text<- tolower(Query_text)
-        # replace blank space & "rt"
-        Query_text <- gsub("rt", "", Query_text)
-        # Replace @UserName
-        Query_text <- gsub("@\\w+", "", Query_text)
-        # Remove punctuation
-        Query_text <- gsub("[[:punct:]]", "", Query_text)
-        # Remove links
-        Query_text <- gsub("http\\w+", "", Query_text)
-        # Remove tabs
-        Query_text <- gsub("[ |\t]{2,}", "", Query_text)
-        # Remove blank spaces at the beginning
-        Query_text <- gsub("^ ", "", Query_text)
-        # Remove blank spaces at the end
-        Query_text <- gsub(" $", "", Query_text)
-        
-       
-      ### Sentiment Analysis ###  
-       
-       mysentiment_Query<-get_nrc_sentiment((Query_text))
-        
-        Sentimentscores_Query<-data.frame(colSums(mysentiment_Query[,]))
-        
-        names(Sentimentscores_Query)<-"Score"
-        Sentimentscores_Query<-cbind("sentiment"=rownames(Sentimentscores_Query),Sentimentscores_Query)
-        rownames(Sentimentscores_Query)<-NULL
-        
-       
-       ### Plot sum of Sentiment Scores by emotion ###
-       
-       ggplot(data=Sentimentscores_Query,aes(x=sentiment,y=Score))+geom_bar(aes(fill=sentiment),stat = "identity")+
-          theme(legend.position="none")+
-          xlab("Sentiments")+ylab("scores")+ggtitle("Sentiments of people behind the tweets on Query")
-      
-  
-        
-        
-        # Wordcloud generator
-        wordcloud(Query_text,min.freq = 10,colors=brewer.pal(6, "Dark2"),random.color = TRUE,max.words = 500)
-        
-        
-         ### Export tweets as CSV ###
-        write.csv(Query_text, file='tweets3.csv')
+
+
+#twitter authentication
+consumer_key <- 'INSERT YOUR CONSUMER KEY'
+consumer_secret <- 'INSERT YOUR CONSUMER SECRET KEY'
+access_token <- 'INSERT YOUR ACCESS_TOKEN'
+access_secret <- 'INSERT YOUR ACCESS SECRET TOKEN'
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+##### SEARCH QUERY #############
+search <- searchTwitter("SEARCH QUERY", n=1000,lang = "en")
+
+
+#convert to dataframe
+tweets <- twListToDF(search)
+
+
+
+#text Only
+tweet_text<- tweets$text
+
+
+########clean text###############
+#convert to lower case
+tweet_text<- tolower(syfy_text)
+# replace blank space & "rt"
+tweet_text <- gsub("rt", "", syfy_text)
+# Replace @UserName
+tweet_text <- gsub("@\\w+", "", syfy_text)
+# Remove punctuation
+tweet_text <- gsub("[[:punct:]]", "", syfy_text)
+# Remove links
+tweet_text <- gsub("http\\w+", "", syfy_text)
+# Remove tabs
+tweet_text <- gsub("[ |\t]{2,}", "", syfy_text)
+# Remove blank spaces at the beginning
+tweet_text <- gsub("^ ", "", syfy_text)
+# Remove blank spaces at the end
+tweet_text <- gsub(" $", "", syfy_text)
+
+
+###Sentiment Analysis###
+
+tweet_sentiment<-sentiment(tweet_text)
+
+tweet_sentimentscores<-data.frame(colSums(tweet_sentiment[,]))
+
+names(tweet_sentimentscores)<-"Score"
+tweet_sentimentscores<-cbind("sentiment"=rownames(tweet_sentimentscores),tweet_sentimentscores)
+rownames(tweet_sentiment)<-NULL
+
+
+
+# Join Tables
+
+tweets_df <- data.frame(tweet_text, tweet_sentiment=tweet_sentiment, tweet_sentimentscores=tweet_sentimentscores, stringsAsFactors = FALSE)
+
+
+merge<-cbind(tweets_df,tweets)
+
+#Select Columns
+
+Final_Table <- select(merge,"tweet_text","tweet_sentiment.word_count","tweet_sentiment.sentiment","favoriteCount","isRetweet","retweetCount")
+
+
+# Export as CSV
+write.csv(Final_Table, file = 'Twitter_Scrape.csv')
+
+
+# Wordcloud generator
+wordcloud(tweet_text,min.freq = 10,colors=brewer.pal(8, "Dark2"),random.color = TRUE,max.words = 100)
