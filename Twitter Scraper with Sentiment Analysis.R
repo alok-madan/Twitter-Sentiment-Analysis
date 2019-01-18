@@ -1,9 +1,10 @@
 ###Packages###
 install.packages("twitteR")
 install.packages("ROAuth")
+install.packages("Sentimentr")
 
 ###Lbrarys###
-
+library("Sentimentr")
 library("twitteR")
 library("syuzhet")
 library("twitteR")
@@ -28,12 +29,11 @@ search <- searchTwitter("SEARCH QUERY", n=1000,lang = "en")
 tweets <- twListToDF(search)
 
 
-
 #text Only
 tweet_text<- tweets$text
 
 
-########clean text###############
+#clean text
 #convert to lower case
 tweet_text<- tolower(tweet_text)
 # replace blank space & "rt"
@@ -52,7 +52,7 @@ tweet_text <- gsub("^ ", "", tweet_text)
 tweet_text <- gsub(" $", "", tweet_text)
 
 
-###Sentiment Analysis###
+#Sentiment Analysis
 
 tweet_sentiment<-sentiment(tweet_text)
 
